@@ -35,10 +35,16 @@ public class RedisConfig extends CachingConfigurerSupport {
 
 	public static final String TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 	@Value("${spring.redis.host}")
-    private String host;
+	private String host;
 	@Value("${spring.redis.port}")
-    private int port;
+	private int port;
 
+	/**
+	 * Jedis is one of the popular Redis Java client, configure the JedisConnectionFactory which will create Jedis
+	 * instances for connecting to the Redis server.
+	 * 
+	 * @return
+	 */
 	@Bean
 	public JedisConnectionFactory jedisConnectionFactory() {
 		JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory();
@@ -64,7 +70,6 @@ public class RedisConfig extends CachingConfigurerSupport {
 		return new GenericJackson2JsonRedisSerializer();
 	}
 
-
 	/**
 	 * Redis template used for handling hotel
 	 *
@@ -72,6 +77,8 @@ public class RedisConfig extends CachingConfigurerSupport {
 	 */
 	@Bean(name = "hotelRedisTemplate")
 	public RedisTemplate<String, Hotel> hotelRedisTemplate() {
+		// Create a RedisTemplate instance which helps to serialize/deserialize between the object and binary data on
+		// the Redis store.
 		RedisTemplate<String, Hotel> redisTemplate = new RedisTemplate<String, Hotel>();
 		redisTemplate.setConnectionFactory(jedisConnectionFactory());
 		redisTemplate.setExposeConnection(true);
@@ -104,6 +111,8 @@ public class RedisConfig extends CachingConfigurerSupport {
 	 */
 	@Bean
 	public RedisCacheManager cacheManager() {
+		// The cache abstraction does not provide an actual store and relies on abstraction materialized by the
+		// org.springframework.cache.Cache and org.springframework.cache.CacheManager interfaces.
 		RedisCacheManager redisCacheManager = new RedisCacheManager(hotelRedisTemplate());
 		redisCacheManager.setTransactionAware(true);
 		redisCacheManager.setLoadRemoteCachesOnStartup(true);
@@ -111,13 +120,15 @@ public class RedisConfig extends CachingConfigurerSupport {
 		return redisCacheManager;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.springframework.cache.annotation.CachingConfigurerSupport#keyGenerator()
 	 */
 	@Bean
 	public KeyGenerator keyGenerator() {
 		return new KeyGenerator() {
-			
+
 			@Override
 			public Object generate(Object o, Method method, Object... params) {
 				StringBuilder sb = new StringBuilder();

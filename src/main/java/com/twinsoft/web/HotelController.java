@@ -82,7 +82,6 @@ public class HotelController {
 	/**
 	 * Rest endpoint for retrieving all hotels.
 	 *
-	 * @param pageable
 	 * @return ResponseEntity<List<Hotel>>
 	 */
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
